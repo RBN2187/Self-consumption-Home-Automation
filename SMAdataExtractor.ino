@@ -2,10 +2,10 @@
 #include <ESP8266HTTPClient.h>
 
 
-#define InvertorSSID "SMA3014730799"      // The name of your Sunnyboy wifi network
-#define InvertorPWD "KJHJSU5ECS5D5CVC"    // The password for this network
+#define InvertorSSID "************"      // The name of your Sunnyboy wifi network
+#define InvertorPWD "*************"      // The password for this network
 
-#define interval 10000                    // Interval between 2 requests to the Invertor server
+#define interval 10000                   // Interval between 2 requests to the Invertor server
 
 int httpCode = 0;
 
@@ -80,7 +80,7 @@ void loop() {
     HTTPClient http;
 
     client.setInsecure();                                                 // insecure as we only request data, not sending any commands
-    client.connect(host, 443);                                            // 443 is port for communication
+    client.connect(host, 443);                                            // 443 is port for https communication
     
     http.begin(client, host);
     String payload;

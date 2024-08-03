@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
-#define SSID "Hazev"
-#define PWD "0168330268"
+#define SSID "*******"
+#define PWD "********"
 
 WiFiClient client;
 

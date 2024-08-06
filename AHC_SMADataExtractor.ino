@@ -36,13 +36,51 @@ int val = 0;                              // Output of this code
 void setup() {
   Serial.begin(9600);
   connectWifi(true);
+}
 
 
-  ///////////////////////////////////////////////////////////////////////////////////
+
+int connectWifi(bool firstConnect) {                  // Credit to SMA-SunnyBoy-Reader library from Pkoerber and beegee-tokyo
+
+  unsigned int retryCount = 0;
+
+  if (!firstConnect) {
+    WiFi.reconnect();
+    } 
+
+  else {
+    WiFi.mode(WIFI_STA);                              // Station mode
+    WiFi.begin(InvertorSSID, InvertorPWD);
+  }
+
+
+  while ((WiFi.status() != WL_CONNECTED) && (retryCount < 20)) {
+    delay(500);
+    Serial.print(".");
+    retryCount++;
+  }
+
+  int success = WiFi.status();
+
+  if (success == WL_CONNECTED) {
+    Serial.println("Connected to Invertor !");
+
+  } 
+  
+  else {
+    Serial.println("Connection failed");
+  }
+  
+  return success;
+}
+
+
+
+void loop() {
 
   if (WiFi.status() == WL_CONNECTED) {
 
-    //HTTP REQUEST CODE//
+    //HTTP REQUEST CODE///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     const char* host = "https://smalogin.net/dyn/getDashValues.json";     // URL of host; request for dashboard values
               
@@ -60,7 +98,7 @@ void setup() {
     if (httpCode == HTTP_CODE_OK){
       payload = http.getString();                                             // response of the server
 
-      //SCAN STRING CODE//
+      //SCAN STRING CODE///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       int indexKeyBegin = payload.indexOf(KEY);                               // search for the desired KEY code in payload
       String payloadSubString = payload.substring(indexKeyBegin);
@@ -110,8 +148,6 @@ void setup() {
         Serial.println("");
       }
 
-
-
       if (indexTag != -1){                                                       // get the data designated to "tag" if it exists
 
         String keyTagSubString = keyString.substring(indexTag);
@@ -127,8 +163,6 @@ void setup() {
 
       }
 
-
-
       else{                                                                     // get the data designated to "val" if it exists
 
         String keyValSubString = keyString.substring(indexVal);
@@ -143,10 +177,8 @@ void setup() {
         Serial.println(buffer);
       
       }
-
     }
 
-    
     else{
       Serial.printf("GET request failed, code: %d\n", httpCode);
     }
@@ -159,50 +191,6 @@ void setup() {
     connectWifi(false);
   }
 
-  //delay(interval);                                                             // wait interval ms for next request
-  ESP.deepSleep(10e6);
-}
+  delay(interval);                                                             // wait interval ms for next request                                                                            
+}                      
 
-
-
-int connectWifi(bool firstConnect) {                  // Credit to SMA-SunnyBoy-Reader library from Pkoerber and beegee-tokyo
-
-  unsigned int retryCount = 0;
-
-  if (!firstConnect) {
-    WiFi.reconnect();
-    } 
-
-  else {
-    WiFi.mode(WIFI_STA);                              // Station mode
-    WiFi.begin(InvertorSSID, InvertorPWD);
-  }
-
-
-  while ((WiFi.status() != WL_CONNECTED) && (retryCount < 20)) {
-    delay(500);
-    Serial.print(".");
-    retryCount++;
-  }
-
-  int success = WiFi.status();
-
-  if (success == WL_CONNECTED) {
-    Serial.println("Connected to Invertor !");
-
-  } 
-  
-  else {
-    Serial.println("Connection failed");
-  }
-  
-  return success;
-}
-
-
-
-void loop() {
-
-  
-                                                                            
-}

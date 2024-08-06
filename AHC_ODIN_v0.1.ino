@@ -4,15 +4,23 @@
 #define SSID "********"
 #define PWD "*********"
 
+/////DATA ARRAYS/////////////////////////////////////////////////////////////////////////////
+
+String slaveNameArray[] = { "VIDAR_001", "VIDAR_002", "VIDAR_003"};
+IPAddress slaveIPArray[] = { {***, ***, ***, ***}, {***, ***, ***, ***}, {***, ***, ***, ***}};
+bool slaveIsOnline[] = {1, 1, 1};
+
+bool slaveStatus[] = {0, 0, 0};
+int slaveValues[] = {0, 0, 0};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 WiFiClient client;
 
 void setup() {
-  
-  
   Serial.begin(9600);
-  //WiFi.hostname("ESP01");
   connectWifi(true);
-  
+  client.setTimeout(2000);
 }
 
 
@@ -53,17 +61,59 @@ int connectWifi(bool firstConnect) {                  // Credit to SMA-SunnyBoy-
 }
 
 
+IPAddress findSlaveIP(String slaveName){
+  
+  for (int i = 0; i < sizeof(slaveNameArray) / sizeof(slaveNameArray[0]); i++){
+    
+    if (slaveNameArray[i] == slaveName){
+      IPAddress slaveIP = slaveIPArray[i];
+      return slaveIP;
+    }
+  }
+  return IPAddress (0, 0, 0, 0);
+}
+
+
+void getDataFromAllSlaves(){
+  for (int i = 0; i < sizeof(slaveNameArray) / sizeof(slaveNameArray[0]); i++){
+    
+    bool didReply = 0;
+    int tryCount = 0;
+
+    while (didReply == 0 && tryCount < 3){
+      if (findSlaveIP(slaveNameArray[i]) != IPAddress (0, 0, 0, 0)){
+        client.connect(findSlaveIP(slaveNameArray[i]), 80);
+        client.println("data request: current consumption\r");
+      }
+
+      String answer = client.readStringUntil('\r');
+      
+      if (answer.length() == 0){
+        answer = "did not reply, try: " + String(tryCount);
+      }
+
+      Serial.println(slaveNameArray[i]+ ": " + answer);
+      client.flush();
+      tryCount++;
+
+      if (tryCount == 3 && didReply == 0){
+        slaveIsOnline[i] = 0;
+      }
+    }
+  }
+}
+
+
 void loop() {
 
-  client.connect(IPAddress (***,***,***,***), 80);
-  client.println("Hello server!\r");
+  //client.connect(IPAddress (***,***,***,***), 80);
+  //client.println("Hello server!\r");
 
-  String answer = client.readStringUntil('\r');
+  //String answer = client.readStringUntil('\r');
 
-  Serial.println("from server: " + answer);
-  client.flush();
-
+  //Serial.println("from server: " + answer);
+  //client.flush();
+  getDataFromAllSlaves();
   delay(2000);
-  
 
 }

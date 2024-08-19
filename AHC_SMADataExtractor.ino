@@ -27,7 +27,6 @@ int keyHigh = 0;                          // output of this code
 int keyLow = 0;                           // output of this code
 
 
-
 void setup() {
   Serial.begin(9600);
   connectWifi(true);
@@ -89,48 +88,54 @@ void loop() {
     String payload;
     httpCode = http.GET();
     
-
+    
     if (httpCode == HTTP_CODE_OK){
       payload = http.getString();                                             // response of the server
 
       //SCAN JSON CODE///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      JsonDocument keyFilter;
-
-      keyFilter["result"]["0199-xxxxx42F"][KEY] = true;
-      
-      JsonDocument keyData;
-
-      DeserializationError error = deserializeJson(keyData, payload, DeserializationOption::Filter(keyFilter));
-
+      JsonDocument SMAData;
+      DeserializationError error = deserializeJson(SMAData, payload);
       if (error) {
         Serial.print("deserializeJson() failed: ");
         Serial.println(error.c_str());
         return;
       }
 
-      if (KEY == "6800_008AA200" || "6800_00832A00"){
-        keyHigh = keyData["1"][0]["high"];
-        keyLow = keyData["1"][0]["low"];
-      }
-
-      if (KEY == "6800_08822000" || "6800_08811F00" || "6800_088A2900" || "6800_08822B00" || "6802_08834500"){
-        JsonArray keyValidVals = keyData["1"][0]["validVals"];                                                         // do something with this array
-        keyTag = keyData["1"][0]["val"][0]["tag"];
-      }
-
-      if (KEY == "6180_08214800" || "6180_08414900" || "6182_08412B00" || "6180_08412800"){
-        keyTag = keyData["1"][0]["val"][0]["tag"];
-      }
-      
       if (KEY == "6800_10821E00"){
-        const char* keyValChar = keyData["1"][0]["val"];
+        const char* keyValChar = SMAData["result"]["0199-xxxxx42F"][KEY]["1"][0]["val"];            //search string for desired keys
+        Serial.printf("val: %s , tag: 0 , high: 0 , low: 0 , validVals: [ ] \n", keyValChar);
       }
 
-      else {
-        keyVal = keyData["1"][0]["val"];
+      else{
+        int keyHighTemp = SMAData["result"]["0199-xxxxx42F"][KEY]["1"][0]["high"];                  //search string for desired keys
+        int keyLowTemp = SMAData["result"]["0199-xxxxx42F"][KEY]["1"][0]["low"];
+        long keyTagTemp = SMAData["result"]["0199-xxxxx42F"][KEY]["1"][0]["val"][0]["tag"];
+        long keyValTemp = SMAData["result"]["0199-xxxxx42F"][KEY]["1"][0]["val"];
+        JsonArray keyValidVals = SMAData["result"]["0199-xxxxx42F"][KEY]["1"][0]["validVals"];
+
+        if (keyHighTemp){         //check if found a result
+          keyHigh = keyHighTemp;
+        }
+
+        if (keyLowTemp){
+          keyLow = keyLowTemp;
+        }
+
+        if (keyTagTemp){
+          keyTag = keyTagTemp;
+        }
+
+        if (keyValTemp){
+          keyVal = keyValTemp;
+        }
+
+        Serial.printf("val: %d , tag: %d , high: %d , low: %d , validVals: [ ", keyVal, keyTag, keyHigh, keyLow);
+        for (JsonVariant value : keyValidVals) {
+          Serial.print(String(value) + " ");
+        }
+        Serial.println("]");
       }
-    
     }
 
     else{

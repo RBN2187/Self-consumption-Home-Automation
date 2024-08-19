@@ -2,7 +2,8 @@
   Example code to extract data from a SMA Sunnyboy Inverter. Tested with a SMA Synnyboy 5.0 and ESP-01 ESP8266 module.
   The code can extract variables as given by a "https://<IPAddressInverter>/dyn/getDashValues.json" request in a browser.
   Probably the most useful variable is represented by Key "6100_40263F00", which is the current power (Watts).
-  The code stores the variable as an integer, in "val", "tag" or "validValsArray".
+  The code stores the variable as an integer, long or const char*, depending on the response of the http request,
+  in "keyVal", "keyTag", "keyLow", "keyHigh", "keyValChar" or in JsonArray "keyValidVals".
 */
 
 

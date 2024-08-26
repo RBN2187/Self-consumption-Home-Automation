@@ -4,7 +4,7 @@
 #define SSID "********"
 #define PWD "*********"
 
-/////DATA ARRAYS/////////////////////////////////////////////////////////////////////////////
+/////DATA ARRAYS and VARIABLES/////////////////////////////////////////////////////////////////////////////
 
 String slaveNameArray[] = { "VIDAR_001", "VIDAR_002", "VIDAR_003"};
 IPAddress slaveIPArray[] = { {***, ***, ***, ***}, {***, ***, ***, ***}, {***, ***, ***, ***}};
@@ -12,6 +12,14 @@ bool slaveIsOnline[] = {1, 1, 1};
 
 bool slaveStatus[] = {0, 0, 0};
 int slaveValues[] = {0, 0, 0};
+
+int slaveStatusSend[] = {0, 0, 0};
+int slaveStatusRcv[] = {0, 0, 0};
+
+
+float totalConsumption = 0;
+float totalProduction = 0;
+float nettoConsumption = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -183,6 +191,21 @@ void changeSlaveStatus(String slave, int status){       // Send a request to a s
       }
     }
   }
+}
+
+void calculatePowerFlow(){    //Calculate the netto consumption or production (work in progress)
+  totalConsumption = 0;
+  totalProduction = 0;
+  for (int i = 0; i < sizeof(slaveValue) / sizeof(slaveValue[0]); i++){
+    if (slaveNameArray[i].indexOf("VIDAR") != -1){
+      totalConsumption += slaveValue[i];
+    }
+    else{
+      totalProduction += slaveValue[i];
+    }
+  }
+  totalConsumption = totalConsumption * 0.95;
+  totalProduction = totalProduction * 0.95;
 }
 
 void loop() {
